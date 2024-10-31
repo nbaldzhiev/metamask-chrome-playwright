@@ -16,7 +16,7 @@ export async function waitForMetamaskPage (
     for (const page of context.pages()) {
       await page.waitForLoadState()
       if (await page.title() === 'MetaMask') {
-        await page.waitForLoadState()
+        await page.waitForLoadState() // wait for loadState again in case the page reloaded from blank to metamask
         return page
       }
     }
