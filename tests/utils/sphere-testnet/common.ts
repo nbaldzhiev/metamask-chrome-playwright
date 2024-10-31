@@ -17,3 +17,11 @@ export async function selectSignInWallet (
   await expect(dialog.locator('h2', { hasText: 'Connect your wallet' })).toBeVisible();
   await dialog.locator(`span:has-text("${wallet}") + button`).click();
 }
+
+/** Verifies that there is a successfully signed in account by checking the Sign In dialog */
+export async function verifySignedInAccount (page: Page) {
+  await page.getByTestId('sign-in-button').click()
+  await expect(page.locator('[role="dialog"] button', { hasText: 'Disconnect' })).toBeVisible()
+  await page.getByTestId('sign-in-button').click()
+  await expect(page.locator('[role="dialog"] button', { hasText: 'Disconnect' })).toBeHidden()
+}

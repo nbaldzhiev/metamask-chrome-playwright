@@ -2,7 +2,7 @@ import { Page, expect as oobExpect } from '@playwright/test';
 import { test, expect } from './fixtures';
 import playwrightConfig from '../playwright.config';
 
-import { selectSignInWallet } from './utils/sphere-testnet/common';
+import { selectSignInWallet, verifySignedInAccount } from './utils/sphere-testnet/common';
 import { allowSiteToAddNetwork, confirmSignatureRequest, connectSiteWithMetamask, createMetamaskWallet } from './utils/metamaskExtension';
 
 const networkInfo = {
@@ -55,5 +55,9 @@ test('Should not be able to buy NFTs with insufficient funds', async ({ page }) 
 
   await test.step('Confirm the account verification request in the Metamask wallet', async () => {
     await confirmSignatureRequest({ page: metamaskPage!, requester: networkInfo.requestingAs });
+  })
+
+  await test.step('Verify that the sign in to Sphere has been successful', async () => {
+    await verifySignedInAccount(page);
   })
 });
