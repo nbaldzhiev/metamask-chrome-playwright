@@ -7,7 +7,7 @@
     "test": "playwright test --workers 1 --headed"
   },
   "keywords": [],
-  "author": "",
+  "author": "Nenko Baldzhiev <nenko.baldzhiev@gmail.com>",
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.48.2",
