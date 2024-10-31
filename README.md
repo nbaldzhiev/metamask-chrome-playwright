@@ -13,10 +13,12 @@ a newly created Metamask wallet (used as a Chrome extension).
 
 ## Known issues/limitations
 
-Playwright's support for browser extensions is not greated, currently only
+Playwright's support for browser extensions is not great, currently only
 possible with the Chrome browser - https://playwright.dev/docs/chrome-extensions.
 
-A known issue that has been observed with this project is that, sometimes, a
+This project is completed only using Playwright, without 3rd party tools.
+
+A known issue that has been observed with the project is that, sometimes, a
 second Metamask extension page gets opened, instead of only one. This messes up the
 interactions with the extension and fails the test. So far, I have not identified
 why this happens (when it does), so it is currently treated as a known issue
