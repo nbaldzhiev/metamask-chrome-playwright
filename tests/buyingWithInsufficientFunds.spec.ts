@@ -3,7 +3,13 @@ import { test, expect } from './fixtures';
 import playwrightConfig from '../playwright.config';
 
 import { selectSignInWallet } from './utils/sphere-testnet/common';
-import { connectSiteWithMetamask, createMetamaskWallet } from './utils/metamaskExtension';
+import { allowSiteToAddNetwork, connectSiteWithMetamask, createMetamaskWallet } from './utils/metamaskExtension';
+
+const networkInfo = {
+  url: 'https://build.onbeam.com/rpc/testnet',
+  name: 'Beam Testnet',
+  chainId: 13337,
+}
 
 test('Should not be able to buy NFTs with insufficient funds', async ({ page }) => {
   const password = `Beam-${Date.now()}!`
@@ -36,5 +42,9 @@ test('Should not be able to buy NFTs with insufficient funds', async ({ page }) 
     await connectSiteWithMetamask({ page: metamaskPage!, siteUrl: playwrightConfig!.use!.baseURL as string });
   });
 
-  await page.waitForTimeout(5000)
+  await test.step('Allow the Sphere network to be added to Metamask', async () => {
+    await allowSiteToAddNetwork(
+      { page: metamaskPage!, networkUrl: networkInfo.url, networkName: networkInfo.name, chainId: networkInfo.chainId }
+    );
+  })
 });

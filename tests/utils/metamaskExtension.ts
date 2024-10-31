@@ -63,3 +63,25 @@ export async function connectSiteWithMetamask ({ page, siteUrl }: { page: Page, 
   await expect(page.locator('h3', { hasText: 'Permissions' })).toBeVisible()
   await page.getByTestId('page-container-footer-next').click()
 }
+
+/**
+ * Completes the process of allowing a site to add a network to Metamask. The starting point of the process is the
+ * "Allow this site to add a network?" screen, so the function should be called on that screen.
+ *
+ * @param networkUrl The URL of the network to be added
+ * @param networkName The name of the network to be added
+ * @param chainId The chain ID of the network to be added 
+ */
+export async function allowSiteToAddNetwork (
+  { page, networkUrl, networkName, chainId }: { page: Page, networkUrl: string, networkName: string, chainId: number }
+) {
+  await expect(page.locator('h3', { hasText: 'Allow this site to add a network?' })).toBeVisible()
+  await expect(page.locator('dd', { hasText: networkUrl })).toBeVisible()
+  await expect(page.locator('dd', { hasText: chainId.toString() })).toBeVisible()
+  await page.getByTestId('confirmation-submit-button').click()
+
+  await expect(page.locator('p', { hasText: networkName })).toBeVisible()
+  await page.getByTestId('confirmation-submit-button').click()
+
+  await expect(page.locator(`[aria-label="Network Menu ${networkName}"]`)).toBeVisible()
+}
