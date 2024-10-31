@@ -1,8 +1,9 @@
 import { Page, expect as oobExpect } from '@playwright/test';
 import { test, expect } from './fixtures';
+import playwrightConfig from '../playwright.config';
 
 import { selectSignInWallet } from './utils/sphere-testnet/common';
-import { createMetamaskWallet } from './utils/metamaskExtension';
+import { connectSiteWithMetamask, createMetamaskWallet } from './utils/metamaskExtension';
 
 test('Should not be able to buy NFTs with insufficient funds', async ({ page }) => {
   const password = `Beam-${Date.now()}!`
@@ -28,6 +29,12 @@ test('Should not be able to buy NFTs with insufficient funds', async ({ page }) 
   oobExpect(metamaskPage).toBeDefined()
 
   await test.step('Create a new MetaMask wallet via the Metamask Chromium extension', async () => {
-    await createMetamaskWallet({ page: metamaskPage, password, secureWhen: 'later' })
+    await createMetamaskWallet({ page: metamaskPage!, password, secureWhen: 'later' });
   });
+
+  await test.step('Connect the Sphere testnet with the Metamask wallet', async () => {
+    await connectSiteWithMetamask({ page: metamaskPage!, siteUrl: playwrightConfig!.use!.baseURL as string });
+  });
+
+  await page.waitForTimeout(5000)
 });

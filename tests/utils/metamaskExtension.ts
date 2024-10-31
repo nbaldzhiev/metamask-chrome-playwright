@@ -3,7 +3,7 @@ import { Page, expect } from '@playwright/test';
 
 /**
  * Createsa a new Metamask wallet. The starting point of the process is the Metamask welcome screen, so the function
- * should be called at this moment.
+ * should be called on that screen. 
  *
  * @param password The password to be used for the wallet
  * @param secureWhen When to secure the wallet. If 'now', the wallet will be secured immediately, otherwise it will be
@@ -44,5 +44,22 @@ export async function createMetamaskWallet (
   await expect(page.locator('h2', { hasText: 'Your MetaMask install is complete!' })).toBeVisible();
   await page.getByTestId('pin-extension-next').click();
   await page.getByTestId('pin-extension-done').click();
+
   await expect(page.getByTestId('pin-extension-done')).toBeHidden();
+}
+
+/**
+ * Completes the process of connecting a site with Metamask. The starting point of the process is the "Connect with
+ * Metamask" screen, so the function should be called on that screen.
+ *
+ * @param siteUrl The URL of the site requesting the connection
+ */
+export async function connectSiteWithMetamask ({ page, siteUrl }: { page: Page, siteUrl: string }) {
+  await expect(page.locator('h3', { hasText: 'Connect with MetaMask' })).toBeVisible()
+  await expect(page.locator('p', { hasText: siteUrl })).toBeVisible()
+  // TODO: Verify the listed account as well
+  await page.getByTestId('page-container-footer-next').click()
+
+  await expect(page.locator('h3', { hasText: 'Permissions' })).toBeVisible()
+  await page.getByTestId('page-container-footer-next').click()
 }
