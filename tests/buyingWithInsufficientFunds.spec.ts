@@ -1,3 +1,4 @@
+import { Page, expect as oobExpect } from '@playwright/test';
 import { test, expect } from './fixtures';
 
 import { selectSignInWallet } from './utils/sphere-testnet/common';
@@ -15,7 +16,16 @@ test('Should not be able to buy NFTs with insufficient funds', async ({ page }) 
     await selectSignInWallet({ page, wallet: 'MetaMask' });
   });
 
-  const metamaskPage = page.context().pages()[1]
+  // retrieve the Metamask extension page
+  let metamaskPage : Page | undefined
+  const pages = page.context().pages()
+  for (const page_ of pages) {
+    if (await page_.title() === 'MetaMask') {
+      metamaskPage = page_
+      break
+    }
+  }
+  oobExpect(metamaskPage).toBeDefined()
 
   await test.step('Create a new MetaMask wallet via the Metamask Chromium extension', async () => {
     await createMetamaskWallet({ page: metamaskPage, password, secureWhen: 'later' })
