@@ -1,10 +1,20 @@
-import { test, expect } from './fixtures';
+import { test } from './fixtures';
 import playwrightConfig from '../playwright.config';
 
 import { selectSignInWallet, verifySignedInAccount } from './utils/sphere-testnet/common';
-import { allowSiteToAddNetwork, confirmSignatureRequest, connectSiteWithMetamask, createMetamaskWallet } from './utils/metamaskExtension';
+import {
+  allowSiteToAddNetwork,
+  confirmSignatureRequest,
+  connectSiteWithMetamask,
+  createMetamaskWallet
+} from './utils/metamaskExtension';
 import { getMetamaskPage } from './utils/generic';
-import { openCollectionViaSearchBar } from './utils/sphere-testnet/collections';
+import {
+  assertCheckoutInsufficientFundsIsVisible,
+  buyNowCollectionNFTItem,
+  openCollectionNFTItem,
+  openCollectionViaSearchBar
+} from './utils/sphere-testnet/collections';
 
 const networkInfo = {
   url: 'https://build.onbeam.com/rpc/testnet',
@@ -12,9 +22,10 @@ const networkInfo = {
   chainId: 13337,
   requestingAs: 'testnet.sphere.market'
 }
-const nftCollection = {
+const collection = {
   name: 'Rumble Arcade Testnet',
-  description: 'A unique PvP squad-battler for mobile & PC.'
+  description: 'A unique PvP squad-battler for mobile & PC.',
+  nftItem: 'Javelina Rank 2'
 }
 
 test('Should not be able to buy NFTs with insufficient funds', async ({ page }) => {
@@ -28,7 +39,6 @@ test('Should not be able to buy NFTs with insufficient funds', async ({ page }) 
   await test.step('Select MetaMask as the Sign In wallet', async () => {
     await selectSignInWallet({ page, wallet: 'MetaMask' });
   });
-
 
   const metamaskPage = await getMetamaskPage(page.context());
 
@@ -60,9 +70,16 @@ test('Should not be able to buy NFTs with insufficient funds', async ({ page }) 
 
   await test.step('Open a NFT collection via the search bar', async () => {
     await openCollectionViaSearchBar(
-      { page, collectionName: nftCollection.name, description: nftCollection.description }
+      { page, collectionName: collection.name, description: collection.description }
     );
   })
 
-  const a = 1
+  await test.step('Open a specific NFT item from the collection', async () => {
+    await openCollectionNFTItem({ page, itemName: collection.nftItem });
+  })
+
+  await test.step('Attempt to buy the NFT item with insufficient funds', async () => {
+    await buyNowCollectionNFTItem({ page, itemName: collection.nftItem });
+    await assertCheckoutInsufficientFundsIsVisible(page);
+  })
 });
