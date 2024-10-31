@@ -3,12 +3,13 @@ import { test, expect } from './fixtures';
 import playwrightConfig from '../playwright.config';
 
 import { selectSignInWallet } from './utils/sphere-testnet/common';
-import { allowSiteToAddNetwork, connectSiteWithMetamask, createMetamaskWallet } from './utils/metamaskExtension';
+import { allowSiteToAddNetwork, confirmSignatureRequest, connectSiteWithMetamask, createMetamaskWallet } from './utils/metamaskExtension';
 
 const networkInfo = {
   url: 'https://build.onbeam.com/rpc/testnet',
   name: 'Beam Testnet',
   chainId: 13337,
+  requestingAs: 'testnet.sphere.market'
 }
 
 test('Should not be able to buy NFTs with insufficient funds', async ({ page }) => {
@@ -42,9 +43,17 @@ test('Should not be able to buy NFTs with insufficient funds', async ({ page }) 
     await connectSiteWithMetamask({ page: metamaskPage!, siteUrl: playwrightConfig!.use!.baseURL as string });
   });
 
-  await test.step('Allow the Sphere network to be added to Metamask', async () => {
+  await test.step('Allow the Sphere network to be added to the Metamask wallet', async () => {
     await allowSiteToAddNetwork(
       { page: metamaskPage!, networkUrl: networkInfo.url, networkName: networkInfo.name, chainId: networkInfo.chainId }
     );
+  })
+
+  await test.step('Request account verification from Sphere', async () => {
+    await page.locator('[data-testid="connect-wallet-modal-body"] button', { hasText: 'Verify' }).click()
+  });
+
+  await test.step('Confirm the account verification request in the Metamask wallet', async () => {
+    await confirmSignatureRequest({ page: metamaskPage!, requester: networkInfo.requestingAs });
   })
 });

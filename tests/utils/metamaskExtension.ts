@@ -85,3 +85,30 @@ export async function allowSiteToAddNetwork (
 
   await expect(page.locator(`[aria-label="Network Menu ${networkName}"]`)).toBeVisible()
 }
+
+/**
+ * Confirms a signature request. The starting point of the process is the "Activity" screen, so the function should be
+ * called on that screen.
+ *
+ * @param requester The name of the requester, i.e. testnet.sphere.market
+ * @param expNumOfRequests The number of requests expected to be present on the activity list. Defaults to 1 since
+ * there are currently only tests working with 1 request at a time.
+ * @param accountName The name of the account confirming the request. Defaults to 'Account 1' since there are currently
+ * only tests working with 1 account at a time.
+ */
+export async function confirmSignatureRequest (
+  { page, requester, expNumOfRequests = 1, accountName = 'Account 1' }:
+  { page: Page, requester: string, expNumOfRequests?: number, accountName?: string }
+) {
+  await page.locator('button', { hasText: 'Activity' }).click()
+
+  // TODO: modify function to allow it to work when there are multiple requests
+  await expect(page.getByTestId('activity-list-item-action')).toHaveCount(expNumOfRequests)
+
+  await page.getByTestId('activity-list-item-action').click()
+  await expect(page.locator('p', { hasText: requester })).toHaveCount(2)
+  await expect(page.locator('p', { hasText: accountName })).toHaveCount(3)
+
+  await page.getByTestId('confirm-footer-button').click()
+  expNumOfRequests && await expect(page.locator('.transaction-list__empty-text', { hasText: 'You have no transactions' })).toBeVisible()
+}
