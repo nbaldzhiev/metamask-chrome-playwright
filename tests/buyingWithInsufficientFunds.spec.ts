@@ -1,18 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './fixtures';
 
-test('has title', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+import { selectSignInWallet } from './utils/sphere-testnet/common';
+import { createMetamaskWallet } from './utils/metamaskExtension';
 
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
-});
+test('Should not be able to buy NFTs with insufficient funds', async ({ page }) => {
+  const password = `Beam-${Date.now()}!`
 
-test('get started link', async ({ page }) => {
-  await page.goto('https://playwright.dev/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-  // Click the get started link.
-  await page.getByRole('link', { name: 'Get started' }).click();
+  await selectSignInWallet({ page, wallet: 'MetaMask' });
 
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+  const metamaskPage = page.context().pages()[1]
+  await createMetamaskWallet({ page: metamaskPage, password, secureWhen: 'later' })
 });
