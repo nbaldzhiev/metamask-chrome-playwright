@@ -9,6 +9,7 @@ a newly created Metamask wallet (used as a Chrome extension).
 ## Installation & running the test
 
     $ pnpm install
+    $ install:chromium
     $ pnpm test
 
 ## Known issues/limitations
