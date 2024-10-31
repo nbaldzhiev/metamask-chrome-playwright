@@ -1,15 +1,20 @@
-import { Page, expect as oobExpect } from '@playwright/test';
 import { test, expect } from './fixtures';
 import playwrightConfig from '../playwright.config';
 
 import { selectSignInWallet, verifySignedInAccount } from './utils/sphere-testnet/common';
 import { allowSiteToAddNetwork, confirmSignatureRequest, connectSiteWithMetamask, createMetamaskWallet } from './utils/metamaskExtension';
+import { getMetamaskPage } from './utils/generic';
+import { openCollectionViaSearchBar } from './utils/sphere-testnet/collections';
 
 const networkInfo = {
   url: 'https://build.onbeam.com/rpc/testnet',
   name: 'Beam Testnet',
   chainId: 13337,
   requestingAs: 'testnet.sphere.market'
+}
+const nftCollection = {
+  name: 'Rumble Arcade Testnet',
+  description: 'A unique PvP squad-battler for mobile & PC.'
 }
 
 test('Should not be able to buy NFTs with insufficient funds', async ({ page }) => {
@@ -24,28 +29,20 @@ test('Should not be able to buy NFTs with insufficient funds', async ({ page }) 
     await selectSignInWallet({ page, wallet: 'MetaMask' });
   });
 
-  // retrieve the Metamask extension page
-  let metamaskPage : Page | undefined
-  const pages = page.context().pages()
-  for (const page_ of pages) {
-    if (await page_.title() === 'MetaMask') {
-      metamaskPage = page_
-      break
-    }
-  }
-  oobExpect(metamaskPage).toBeDefined()
+
+  const metamaskPage = await getMetamaskPage(page.context());
 
   await test.step('Create a new MetaMask wallet via the Metamask Chromium extension', async () => {
-    await createMetamaskWallet({ page: metamaskPage!, password, secureWhen: 'later' });
+    await createMetamaskWallet({ page: metamaskPage, password, secureWhen: 'later' });
   });
 
   await test.step('Connect the Sphere testnet with the Metamask wallet', async () => {
-    await connectSiteWithMetamask({ page: metamaskPage!, siteUrl: playwrightConfig!.use!.baseURL as string });
+    await connectSiteWithMetamask({ page: metamaskPage, siteUrl: playwrightConfig!.use!.baseURL as string });
   });
 
   await test.step('Allow the Sphere network to be added to the Metamask wallet', async () => {
     await allowSiteToAddNetwork(
-      { page: metamaskPage!, networkUrl: networkInfo.url, networkName: networkInfo.name, chainId: networkInfo.chainId }
+      { page: metamaskPage, networkUrl: networkInfo.url, networkName: networkInfo.name, chainId: networkInfo.chainId }
     );
   })
 
@@ -54,10 +51,18 @@ test('Should not be able to buy NFTs with insufficient funds', async ({ page }) 
   });
 
   await test.step('Confirm the account verification request in the Metamask wallet', async () => {
-    await confirmSignatureRequest({ page: metamaskPage!, requester: networkInfo.requestingAs });
+    await confirmSignatureRequest({ page: metamaskPage, requester: networkInfo.requestingAs });
   })
 
   await test.step('Verify that the sign in to Sphere has been successful', async () => {
     await verifySignedInAccount(page);
   })
+
+  await test.step('Open a NFT collection via the search bar', async () => {
+    await openCollectionViaSearchBar(
+      { page, collectionName: nftCollection.name, description: nftCollection.description }
+    );
+  })
+
+  const a = 1
 });
