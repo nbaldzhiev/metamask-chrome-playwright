@@ -6,6 +6,7 @@ import { createMetamaskWallet } from './utils/metamaskExtension';
 test('Should not be able to buy NFTs with insufficient funds', async ({ page }) => {
   const password = `Beam-${Date.now()}!`
 
+  // the page seems to load indefinitely, hence the waitUntil: 'domcontentloaded' instead of 'load'
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 
   await selectSignInWallet({ page, wallet: 'MetaMask' });
