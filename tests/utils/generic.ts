@@ -1,4 +1,4 @@
-import { BrowserContext, Page, expect } from "@playwright/test"
+import { BrowserContext, Page } from "@playwright/test"
 
 export const sphereNetworkInfo = {
   url: 'https://build.onbeam.com/rpc/testnet',
@@ -7,16 +7,19 @@ export const sphereNetworkInfo = {
   requestingAs: 'testnet.sphere.market'
 }
 
-/** Returns the page, if such exist, from a BrowserContext's list of pages */
-export async function getMetamaskPage (context: BrowserContext): Promise<Page> {
-  let metamaskPage : Page | undefined
-  for (const page of context.pages()) {
-    if (await page.title() === 'MetaMask') {
-      metamaskPage = page
-      break
+/** Waits for the Metamask extension page to be opened & loaded */
+export async function waitForMetamaskPage (
+  { context, attempts = 15, interval = 1_000 }:
+  { context: BrowserContext, attempts?: number, interval?: number }
+): Promise<Page | undefined> {
+  for (let i = 0; i < attempts; i++) {
+    for (const page of context.pages()) {
+      await page.waitForLoadState()
+      if (await page.title() === 'MetaMask') {
+        await page.waitForLoadState()
+        return page
+      }
     }
+    await new Promise((resolve) => setTimeout(resolve, interval))
   }
-  expect(metamaskPage).toBeDefined()
-
-  return metamaskPage!
 }

@@ -19,8 +19,7 @@ possible with the Chrome browser - https://playwright.dev/docs/chrome-extensions
 
 This project is completed only using Playwright, without 3rd party tools.
 
-A known issue that has been observed with the project is that, sometimes (rarely), a
-second Metamask extension page gets opened, instead of only one. This messes up the
-interactions with the extension and fails the test. So far, I have not identified
-why this happens (when it does), so it is currently treated as a known issue
-pending to be resolved.
+A really unpleasant issue that I've observed is the arbitrary number of pages
+that get automatically opened upon initialisation - sometimes 2, other times 3.
+I haven't investigated long enough why that happens, but the function 
+`waitForMetamaskPage` that I created seems stable enough & works well regardless of this issue.

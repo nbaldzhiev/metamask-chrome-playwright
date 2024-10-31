@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import { test } from './fixtures';
 import playwrightConfig from '../playwright.config';
 
@@ -8,7 +9,7 @@ import {
   connectSiteWithMetamask,
   createMetamaskWallet
 } from './utils/metamaskExtension';
-import { sphereNetworkInfo, getMetamaskPage } from './utils/generic';
+import { sphereNetworkInfo, waitForMetamaskPage } from './utils/generic';
 import {
   assertCheckoutInsufficientFundsIsVisible,
   buyNowCollectionNFTItem,
@@ -25,23 +26,24 @@ const collection = {
 test('Should not be able to buy NFTs with insufficient funds', async ({ page }) => {
   const password = `Beam-${Date.now()}!`
 
+  const metamaskPage = await waitForMetamaskPage({ context: page.context() })
+  expect(metamaskPage).toBeDefined()
+
   await test.step('Open the Sphere testnets page and select Metamask as the Sign In wallet', async () => {
     // the page seems to load indefinitely, hence the waitUntil: 'domcontentloaded' instead of 'load'
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await selectSignInWallet({ page, wallet: 'MetaMask' });
   });
 
-  const metamaskPage = await getMetamaskPage(page.context());
-
   await test.step('Create a new MetaMask wallet via the Metamask Chromium extension', async () => {
-    await createMetamaskWallet({ page: metamaskPage, password, secureWhen: 'later' });
+    await createMetamaskWallet({ page: metamaskPage!, password, secureWhen: 'later' });
   });
 
   await test.step('Connect the Sphere testnet with the Metamask wallet & allow the network', async () => {
-    await connectSiteWithMetamask({ page: metamaskPage, siteUrl: playwrightConfig!.use!.baseURL as string });
+    await connectSiteWithMetamask({ page: metamaskPage!, siteUrl: playwrightConfig!.use!.baseURL as string });
     await allowSiteToAddNetwork(
       {
-        page: metamaskPage,
+        page: metamaskPage!,
         networkUrl: sphereNetworkInfo.url,
         networkName: sphereNetworkInfo.name,
         chainId: sphereNetworkInfo.chainId
@@ -51,7 +53,7 @@ test('Should not be able to buy NFTs with insufficient funds', async ({ page }) 
 
   await test.step('Request account verification from Sphere & confirm request in Metamask', async () => {
     await page.locator('[data-testid="connect-wallet-modal-body"] button', { hasText: 'Verify' }).click()
-    await confirmSignatureRequest({ page: metamaskPage, requester: sphereNetworkInfo.requestingAs });
+    await confirmSignatureRequest({ page: metamaskPage!, requester: sphereNetworkInfo.requestingAs });
   });
 
   await test.step('Verify that the sign in to Sphere has been successful', async () => {
